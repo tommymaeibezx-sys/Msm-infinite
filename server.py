@@ -9,14 +9,15 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
 
-print("MSM PRO SERVER ONLINE")
+print("MSM SERVER PRO ACTIVO")
 
 def send(client, data):
-    client.send((json.dumps(data) + "\n").encode())
+    packet = json.dumps(data) + "\n"
+    client.send(packet.encode())
 
 while True:
     client, addr = server.accept()
-    print("Cliente:", addr)
+    print("Cliente conectado:", addr)
 
     while True:
         try:
