@@ -1,65 +1,29 @@
 {
-  "user": {
-    "id": 1,
-    "name": "Player"
-  },
+  "user": { "id": 1, "name": "Player" },
 
   "currencies": {
-    "coins": 9999999,
+    "coins": 999999,
     "diamonds": 9999,
     "food": 999999
   },
 
-  "monsters": [
-    {
-      "id": 1,
-      "type": "noggin",
-      "level": 5,
-      "happiness": 100,
-      "name": "Noggy"
-    }
-  ],
-
-  "structures": [
-    {
-      "id": 1,
-      "type": "castle",
-      "level": 1
-    }
-  ],
-
+  "monsters": [],
+  "structures": [],
   "islands": [
-    {
-      "id": 1,
-      "type": "plant",
-      "structures": [1],
-      "monsters": [1]
-    }
+    { "id": 1, "type": "plant", "monsters": [], "structures": [] }
   ],
 
-  "torches": [
-    {
-      "friend_id": 2,
-      "lit": true,
-      "time": 999999
-    }
-  ],
-
-  "friends": [],
-
-  "messages": [],
-
-  "quests": {
-    "completed": [],
-    "claimed": []
-  },
+  "eggs": [],
+  "breeding": null,
+  "baking": null,
 
   "battle": {
     "level": 1,
     "team": []
   },
 
-  "composer": {
-    "tracks": []
-  }
-} 
+  "torches": [],
+  "friends": [],
+  "messages": [],
+  "quests": { "completed": [], "claimed": [] }
+}
