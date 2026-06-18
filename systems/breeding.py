@@ -1,15 +1,12 @@
 import time
 from utils import save_player
 
-BREED_TIME = 30  # segundos
+BREED_TIME = 60
 
 def start(player, req):
-    m1 = req.get("parent_1")
-    m2 = req.get("parent_2")
-
     player["breeding"] = {
-        "parent_1": m1,
-        "parent_2": m2,
+        "parent_1": req.get("parent_1"),
+        "parent_2": req.get("parent_2"),
         "end_time": time.time() + BREED_TIME
     }
 
@@ -19,8 +16,11 @@ def start(player, req):
 
 
 def finish(player):
+    if not player["breeding"]:
+        return {"error": "no_breeding"}
+
     if time.time() < player["breeding"]["end_time"]:
-        return {"error": "not_ready"}
+        return {"error": "wait"}
 
     egg = {
         "id": len(player["eggs"]) + 1,
@@ -37,7 +37,7 @@ def finish(player):
 
 def hatch(player):
     if not player["eggs"]:
-        return {"error": "no_egg"}
+        return {"error": "no_eggs"}
 
     egg = player["eggs"].pop(0)
 
