@@ -14,7 +14,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
 
-print("MSM PRO MAX SERVER ONLINE")
+print("🔥 MSM PRO MAX FINAL 🔥")
 
 def send(client, data):
     client.send((json.dumps(data) + "\n").encode())
@@ -27,7 +27,7 @@ threading.Thread(target=cleanup, daemon=True).start()
 
 while True:
     client, addr = server.accept()
-    print("Nueva conexión:", addr)
+    print("Conectado:", addr)
 
     if is_full():
         send(client, {"error": "server_full"})
@@ -37,19 +37,16 @@ while True:
     user_id = None
 
     try:
-        # 📥 PRIMER MENSAJE = LOGIN
         raw = client.recv(4096)
         data = json.loads(raw.decode())
 
         if data["_cmd"] == "login":
             user_id = data.get("user_id")
-
             account = load_account(user_id)
 
             if not account:
                 account = create_account()
                 user_id = account["user_id"]
-
         else:
             account = create_account()
             user_id = account["user_id"]
@@ -62,7 +59,6 @@ while True:
             "user_id": user_id
         })
 
-        # 🔁 LOOP
         while True:
             raw = client.recv(4096)
             if not raw:
