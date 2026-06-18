@@ -1,6 +1,6 @@
 import socket
 import json
-from handlers import handle_request
+from router import route
 
 HOST = "0.0.0.0"
 PORT = 9933
@@ -9,31 +9,28 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
 
-print("Servidor MSM corriendo en puerto", PORT)
+print("MSM PRO SERVER ONLINE")
 
 def send(client, data):
-    packet = json.dumps(data).encode()
-    client.send(packet)
+    client.send((json.dumps(data) + "\n").encode())
 
 while True:
     client, addr = server.accept()
-    print("Cliente conectado:", addr)
+    print("Cliente:", addr)
 
     while True:
         try:
-            data = client.recv(4096)
-            if not data:
+            raw = client.recv(4096)
+            if not raw:
                 break
 
-            request = json.loads(data.decode())
-            cmd = request.get("_cmd")
-
-            response = handle_request(cmd, request)
+            request = json.loads(raw.decode())
+            response = route(request)
 
             send(client, response)
 
         except Exception as e:
-            print("Error:", e)
+            print("ERROR:", e)
             break
 
-    client.close() 
+    client.close()
