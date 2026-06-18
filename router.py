@@ -1,43 +1,23 @@
-import time
-from utils import load_player, save_player
-from systems import breeding, baking, structures
-from auto_handler import auto_handle
+from multiplayer import get_online_players
 
-def route(req):
+def route(req, user_id):
     cmd = req.get("_cmd")
-    player = load_player()
 
-    # INIT
-    if cmd == "gs_initialized":
+    if cmd == "get_online":
         return {
-            "_cmd": "gs_initialized",
-            "server_time": int(time.time())
+            "_cmd": "get_online",
+            "players": get_online_players()
         }
 
-    # =====================
-    # SISTEMAS REALES
-    # =====================
+    if cmd == "visit_island":
+        target = req.get("target_id")
 
-    if cmd == "gs_breed_monsters":
-        return breeding.start(player, req)
+        return {
+            "_cmd": "visit_island",
+            "target_id": target
+        }
 
-    if cmd == "gs_finish_breeding":
-        return breeding.finish(player)
-
-    if cmd == "gs_hatch_egg":
-        return breeding.hatch(player)
-
-    if cmd == "gs_start_baking":
-        return baking.start(player)
-
-    if cmd == "gs_finish_baking":
-        return baking.finish(player)
-
-    if cmd == "gs_buy_structure":
-        return structures.buy(player, req)
-
-    # =====================
-    # AUTO HANDLER (MAGIA)
-    # =====================
-
-    return auto_handle(cmd, req, player)
+    return {
+        "_cmd": cmd,
+        "status": "ok"
+    }
