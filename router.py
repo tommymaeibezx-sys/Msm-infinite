@@ -1,7 +1,6 @@
 import time
-from systems import breeding, structures, baking
-
 from utils import load_player, save_player
+from systems import breeding, baking, structures, battle
 
 def route(req):
     cmd = req.get("_cmd")
@@ -14,12 +13,25 @@ def route(req):
             "server_time": int(time.time())
         }
 
-    # DB SYNC
-    if cmd.startswith("db_"):
-        return handle_db(cmd, player)
+    # =====================
+    # DATABASE (db_*)
+    # =====================
+    if cmd == "db_monster":
+        return {"_cmd": cmd, "data": player["monsters"]}
 
-    # SYSTEMS
-    if cmd.startswith("gs_breed"):
+    if cmd == "db_structure":
+        return {"_cmd": cmd, "data": player["structures"]}
+
+    if cmd == "db_island":
+        return {"_cmd": cmd, "data": player["islands"]}
+
+    if cmd == "db_battle":
+        return {"_cmd": cmd, "data": player["battle"]}
+
+    # =====================
+    # BREEDING
+    # =====================
+    if cmd == "gs_breed_monsters":
         return breeding.start(player, req)
 
     if cmd == "gs_finish_breeding":
@@ -28,11 +40,29 @@ def route(req):
     if cmd == "gs_hatch_egg":
         return breeding.hatch(player)
 
+    # =====================
+    # BAKING
+    # =====================
+    if cmd == "gs_start_baking":
+        return baking.start(player)
+
+    if cmd == "gs_finish_baking":
+        return baking.finish(player)
+
+    # =====================
+    # STRUCTURES
+    # =====================
     if cmd == "gs_buy_structure":
         return structures.buy(player, req)
 
+    if cmd == "gs_move_structure":
+        return structures.move(player, req)
+
+    # =====================
+    # REWARDS
+    # =====================
     if cmd == "gs_collect_rewards":
-        player["currencies"]["coins"] += 500
+        player["currencies"]["coins"] += 1000
         save_player(player)
 
         return {
@@ -40,11 +70,12 @@ def route(req):
             "currencies": player["currencies"]
         }
 
-    return {"_cmd": cmd, "ok": True}
+    # =====================
+    # MONSTER UPDATE
+    # =====================
+    if cmd == "gs_update_monster":
+        save_player(player)
+        return {"_cmd": cmd, "status": "ok"}
 
-
-def handle_db(cmd, player):
-    return {
-        "_cmd": cmd,
-        "data": player.get(cmd.replace("db_", ""), {})
-    }
+    # DEFAULT
+    return {"_cmd": cmd, "status": "ok"}
