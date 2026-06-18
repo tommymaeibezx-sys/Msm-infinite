@@ -9,10 +9,7 @@ def create_session(user_id):
     if len(sessions) >= MAX_PLAYERS:
         return None
 
-    sessions[user_id] = {
-        "last_active": time.time()
-    }
-
+    sessions[user_id] = {"last_active": time.time()}
     return sessions[user_id]
 
 def update_activity(user_id):
