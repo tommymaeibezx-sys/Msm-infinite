@@ -1,8 +1,11 @@
 import socket
 import json
 import threading
+
 from router import route
-from session_manager import create_guest, update_activity, remove_inactive, is_full
+from session_manager import create_session, update_activity, remove_inactive, is_full
+from account_manager import create_account, load_account
+from multiplayer import player_join, player_leave
 
 HOST = "0.0.0.0"
 PORT = 9933
@@ -11,56 +14,72 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
 
-print("MSM SERVER PRO + ONLINE")
+print("MSM PRO MAX SERVER ONLINE")
 
 def send(client, data):
     client.send((json.dumps(data) + "\n").encode())
 
-def cleanup_loop():
+def cleanup():
     while True:
         remove_inactive()
 
-threading.Thread(target=cleanup_loop, daemon=True).start()
+threading.Thread(target=cleanup, daemon=True).start()
 
 while True:
     client, addr = server.accept()
-    print("Conexión:", addr)
+    print("Nueva conexión:", addr)
 
-    # 👤 CREAR GUEST AUTOMÁTICO
     if is_full():
         send(client, {"error": "server_full"})
         client.close()
         continue
 
-    session = create_guest()
-    user_id = session["user_id"]
+    user_id = None
 
-    send(client, {
-        "_cmd": "guest_login",
-        "user_id": user_id
-    })
+    try:
+        # 📥 PRIMER MENSAJE = LOGIN
+        raw = client.recv(4096)
+        data = json.loads(raw.decode())
 
-    while True:
-        try:
+        if data["_cmd"] == "login":
+            user_id = data.get("user_id")
+
+            account = load_account(user_id)
+
+            if not account:
+                account = create_account()
+                user_id = account["user_id"]
+
+        else:
+            account = create_account()
+            user_id = account["user_id"]
+
+        create_session(user_id)
+        player_join(user_id)
+
+        send(client, {
+            "_cmd": "login_ok",
+            "user_id": user_id
+        })
+
+        # 🔁 LOOP
+        while True:
             raw = client.recv(4096)
             if not raw:
                 break
 
-            request = json.loads(raw.decode())
+            req = json.loads(raw.decode())
 
-            # 🔄 actualizar actividad
             update_activity(user_id)
 
-            response = route(request)
+            res = route(req, user_id)
 
-            # incluir user_id siempre
-            response["user_id"] = user_id
+            send(client, res)
 
-            send(client, response)
+    except Exception as e:
+        print("ERROR:", e)
 
-        except Exception as e:
-            print("ERROR:", e)
-            break
-
-    print("Jugador desconectado:", user_id)
-    client.close()
+    finally:
+        print("Desconectado:", user_id)
+        player_leave(user_id)
+        client.close()
